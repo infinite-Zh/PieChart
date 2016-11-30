@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context="com.infinite.piecharta.MainActivity">
 
-    <com.infinite.piecharta.One
+    <com.infinite.piecharta.PieChart
         android:id="@+id/one"
         android:background="@android:color/holo_blue_bright"
         android:layout_width="match_parent"
