@@ -15,12 +15,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         one= (PieChart) findViewById(R.id.one);
         TestEntity entity=new TestEntity(50,"#FF7F50");
-        TestEntity entity1=new TestEntity(50,"#DC143C");
-        TestEntity entity2=new TestEntity(50,"#00008B");
-        TestEntity entity3=new TestEntity(50,"#A9A9A9");
-        TestEntity entity4=new TestEntity(50,"#8B0000");
-        TestEntity entity5=new TestEntity(50,"#9400D3");
-        TestEntity entity6=new TestEntity(50,"#FFD700");
+        TestEntity entity1=new TestEntity(38,"#DC143C");
+        TestEntity entity2=new TestEntity(79,"#00008B");
+        TestEntity entity3=new TestEntity(20,"#A9A9A9");
+        TestEntity entity4=new TestEntity(105,"#8B0000");
+        TestEntity entity5=new TestEntity(53,"#9400D3");
+        TestEntity entity6=new TestEntity(80,"#FFD700");
 
         List<IPieElement> list=new ArrayList<>();
         list.add(entity);
