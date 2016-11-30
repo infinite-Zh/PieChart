@@ -1,6 +1,6 @@
 # PieChart
 简单的饼状图
-![](https://github.com/infinite-Zh/PieChartA/p.png)
+![](https://github.com/infinite-Zh/PieChart/p.png)
 ---
 1、在xml中引用：
 ```
