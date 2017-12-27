@@ -9,7 +9,11 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.util.SparseArray;
 import android.view.Display;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -20,8 +24,8 @@ import java.util.List;
 /**
  * Created by inf on 2016/11/29.
  */
-
-public class PieChart extends View{
+// TODO: 2017/12/28 添加点击事件的回调
+public class PieChart extends View implements GestureDetector.OnGestureListener{
 
 
     /**
@@ -60,6 +64,10 @@ public class PieChart extends View{
      * 中心文字
      */
     private String mText;
+
+    private SparseArray<double[]> angles=new SparseArray<>();
+
+    private GestureDetector mDetector;
     public PieChart(Context context) {
         this(context,null);
     }
@@ -74,6 +82,7 @@ public class PieChart extends View{
     }
 
     private void init(){
+        mDetector=new GestureDetector(getContext(),this);
         mPieRect =new RectF();
         mPiePaint=new Paint(Paint.ANTI_ALIAS_FLAG);
         mPiePaint.setColor(Color.RED);
@@ -89,6 +98,11 @@ public class PieChart extends View{
         mTextPaint.setTextSize(30);
         mTextPaint.setColor(Color.BLACK);
 
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return mDetector.onTouchEvent(event);
     }
 
     @Override
@@ -135,11 +149,11 @@ public class PieChart extends View{
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.translate(mWidth/2,mHeight/2);
-        canvas.drawArc(mPieRect,0,90,true,mPiePaint);
-        canvas.drawArc(mPieRect,90,1,true,mBlankPaint);
-        canvas.drawArc(mPieRect,91,45,true,mPiePaint);
-        canvas.drawArc(mPieRect,136,1,true,mBlankPaint);
-        canvas.drawArc(mPieRect,137,50,true,mPiePaint);
+//        canvas.drawArc(mPieRect,0,90,true,mPiePaint);
+//        canvas.drawArc(mPieRect,90,1,true,mBlankPaint);
+//        canvas.drawArc(mPieRect,91,45,true,mPiePaint);
+//        canvas.drawArc(mPieRect,136,1,true,mBlankPaint);
+//        canvas.drawArc(mPieRect,137,50,true,mPiePaint);
         //从12点方向开始画
         float sweepedAngle=-90;
         mTextPaint.setTextSize(30);
@@ -150,6 +164,10 @@ public class PieChart extends View{
             //画扇形
             canvas.drawArc(mPieRect,sweepedAngle,mAngles.get(i),true,mPiePaint);
             //扫过的角度++
+            double[] ang=new double[2];
+            ang[0]= sweepedAngle+90;
+            ang[1]=ang[0]+mAngles.get(i);
+            angles.put(i,ang);
             sweepedAngle+=mAngles.get(i);
 
             String percentText=mPercents.get(i)+"%";
@@ -233,17 +251,34 @@ public class PieChart extends View{
         paint.getTextBounds(text,0,text.length(),rect);
         return rect.height();
     }
+
+    /**
+     * @param paint
+     * @param text
+     * @return
+     */
     private float getTextWidth(Paint paint,String text){
         Rect rect=new Rect();
         paint.getTextBounds(text,0,text.length(),rect);
         return rect.width();
     }
 
+    /** 获取圆弧中点的x轴坐标
+     * @param angle 圆弧对应的角度
+     * @param sweepedAngle 扫过的角度
+     * @return 圆弧中点的x轴坐标
+     */
     private float getXCoordinate(float angle,float sweepedAngle){
         float x= (float) (mRadius*Math.cos(Math.toRadians(sweepedAngle-angle/2)));
         return x;
 
     }
+
+    /**获取圆弧中点的y轴坐标
+     * @param angle 圆弧对应的角度
+     * @param sweepedAngle 扫过的角度
+     * @return 圆弧中点的y轴坐标
+     */
     private float getYCoordinate(float angle,float sweepedAngle){
         float y= (float) (mRadius*Math.sin(Math.toRadians(sweepedAngle-angle/2)));
         return y;
@@ -295,5 +330,67 @@ public class PieChart extends View{
             }
         }
 
+    }
+
+    @Override
+    public boolean onDown(MotionEvent motionEvent) {
+        return true;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent motionEvent) {
+
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent motionEvent) {
+        float x=motionEvent.getX();
+        float y=motionEvent.getY();
+        float centerX=getWidth()/2;
+        float centerY=getHeight()/2;
+
+        // 判断象限
+        // 第一象限
+        double angle=0;
+
+        if (x>centerX&&y<centerY){
+            angle=Math.toDegrees(Math.atan((Math.abs(x-centerX))/(Math.abs(centerY-y))));
+
+        }else if (x>centerX&&y>centerY){//第二象限
+            angle=Math.toDegrees(Math.atan(((y-centerY)/(x-centerX))));
+            angle+=90;
+        }else if (x<centerX&&y>centerY){//第三象限
+            angle=Math.toDegrees(Math.atan(((centerX-x)/(y-centerY))));
+            angle+=180;
+        }else if (x<centerX&&y<centerY){//第四象限
+            angle=Math.toDegrees(Math.atan(((centerY-y)/(centerX-x))));
+            angle+=270;
+        }
+
+        for(int i=0;i<angles.size();i++){
+            double[] angs=angles.get(i);
+            if (angle>=angs[0]&&angle<=angs[1]){
+                Log.e("click", String.valueOf(mElements.get(i).getValue()));
+            }
+        }
+//        Log.e("angle", String.valueOf(angle));
+
+
+        return false;
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+        return false;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent motionEvent) {
+
+    }
+
+    @Override
+    public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+        return false;
     }
 }
