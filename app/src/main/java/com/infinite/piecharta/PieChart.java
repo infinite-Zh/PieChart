@@ -370,7 +370,10 @@ public class PieChart extends View implements GestureDetector.OnGestureListener{
         for(int i=0;i<angles.size();i++){
             double[] angs=angles.get(i);
             if (angle>=angs[0]&&angle<=angs[1]){
-                Log.e("click", String.valueOf(mElements.get(i).getValue()));
+//                Log.e("click", String.valueOf(mElements.get(i).getValue()));
+                if (mListener!=null){
+                    mListener.onItemClick(i);
+                }
             }
         }
 //        Log.e("angle", String.valueOf(angle));
@@ -392,5 +395,14 @@ public class PieChart extends View implements GestureDetector.OnGestureListener{
     @Override
     public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
         return false;
+    }
+
+    private OnItemClickListener mListener;
+    public interface OnItemClickListener{
+        void onItemClick(int position);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener){
+        mListener=listener;
     }
 }

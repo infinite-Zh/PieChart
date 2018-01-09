@@ -2,6 +2,7 @@ package com.infinite.piecharta;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,5 +33,11 @@ public class MainActivity extends AppCompatActivity {
         list.add(entity6);
         one.setData(list);
         one.setTitleText("年终总结比例图");
+        one.setOnItemClickListener(new PieChart.OnItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+                Log.e("pos",position+"");
+            }
+        });
     }
 }
