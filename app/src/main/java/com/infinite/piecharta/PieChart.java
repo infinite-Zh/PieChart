@@ -375,7 +375,7 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
 //        Log.e("angle", String.valueOf(angle));
         int position = getPosition(motionEvent);
-        if (position > 0 && mListener != null) {
+        if (position >= 0 && mListener != null) {
             mListener.onItemClick(position);
         }
 

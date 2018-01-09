@@ -3,6 +3,7 @@ package com.infinite.piecharta;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
         TestEntity entity5 = new TestEntity(53, "#9400D3", "稻香");
         TestEntity entity6 = new TestEntity(80, "#FFD700", "七里香");
 
-        List<IPieElement> list = new ArrayList<>();
+        final List<IPieElement> list = new ArrayList<>();
         list.add(entity);
         list.add(entity1);
         list.add(entity2);
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(int position) {
                 Log.e("pos", position + "");
+                Toast.makeText(MainActivity.this,"position="+position+"\n"+list.get(position).getValue(),Toast.LENGTH_LONG).show();
             }
         });
     }
