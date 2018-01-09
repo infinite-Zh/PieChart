@@ -9,7 +9,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -43,7 +42,7 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
     /**
      * 各种画笔
      */
-    private Paint mPiePaint, mBlankPaint, mLinePaint, mTextPaint;
+    private Paint mPiePaint, mBlankPaint, mLinePaint, mTextPaint, mLegendPaint;
     /**
      * 实体类集合
      */
@@ -99,6 +98,8 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         mTextPaint.setTextSize(30);
         mTextPaint.setColor(Color.BLACK);
 
+        mLegendPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mLegendPaint.setTextSize(30);
     }
 
     @Override
@@ -150,12 +151,8 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        canvas.save();
         canvas.translate(mWidth / 2, mHeight / 2);
-//        canvas.drawArc(mPieRect,0,90,true,mPiePaint);
-//        canvas.drawArc(mPieRect,90,1,true,mBlankPaint);
-//        canvas.drawArc(mPieRect,91,45,true,mPiePaint);
-//        canvas.drawArc(mPieRect,136,1,true,mBlankPaint);
-//        canvas.drawArc(mPieRect,137,50,true,mPiePaint);
         //从12点方向开始画
         float sweepedAngle = -90;
         mTextPaint.setTextSize(30);
@@ -217,6 +214,26 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         mTextPaint.setTextAlign(Paint.Align.CENTER);
         canvas.drawText(longerText, 0, 0, mTextPaint);
         canvas.drawText(mText.substring((int) (index)), 0, getTextHeight(mTextPaint, mText) + 6, mTextPaint);
+        canvas.restore();
+        if (mShowLegend) {
+            drawLegend(canvas);
+        }
+    }
+
+    private Rect rect = new Rect();
+
+    private void drawLegend(Canvas canvas) {
+        float verticalOffset = 0;
+        for (int i = 0; i < mElements.size(); i++) {
+            IPieElement ele = mElements.get(i);
+            mLegendPaint.setColor(Color.parseColor(ele.getColor()));
+            mLegendPaint.getTextBounds(ele.getDescription(), 0, ele.getDescription().length(), rect);
+            verticalOffset = rect.height() + 20;
+            canvas.translate(0, verticalOffset);
+            mLegendPaint.setStrokeWidth(8);
+            canvas.drawLine(10, 0, 80, 0, mLegendPaint);
+            canvas.drawText(ele.getDescription(), 90, rect.height() / 2, mLegendPaint);
+        }
     }
 
     /**
@@ -425,5 +442,11 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
     public void setOnItemClickListener(OnItemClickListener listener) {
         mListener = listener;
+    }
+
+    private boolean mShowLegend = true;
+
+    public void enableLegend(boolean enable) {
+        mShowLegend = enable;
     }
 }

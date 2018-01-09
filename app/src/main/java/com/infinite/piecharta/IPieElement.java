@@ -12,4 +12,6 @@ public interface IPieElement {
      * @return
      */
     String getColor();
+
+    String getDescription();
 }
