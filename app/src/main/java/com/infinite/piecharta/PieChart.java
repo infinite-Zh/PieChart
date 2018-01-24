@@ -425,9 +425,6 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         for (int i = 0; i < angles.size(); i++) {
             double[] angs = angles.get(i);
             if (angle >= angs[0] && angle <= angs[1]) {
-//                if (mListener!=null){
-//                    mListener.onItemClick(i);
-//                }
                 return i;
             }
         }
