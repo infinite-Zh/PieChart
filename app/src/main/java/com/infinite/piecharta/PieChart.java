@@ -303,6 +303,11 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
     }
 
 
+    /**
+     * 获取点击位置坐标对应的饼状图的区域
+     * @param motionEvent
+     * @return 数据的position
+     */
     private int getPosition(MotionEvent motionEvent) {
         float x = motionEvent.getX();
         float y = motionEvent.getY();
@@ -356,6 +361,10 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         mShowLegend = enable;
     }
 
+    /**
+     * 画图例
+     * @param canvas
+     */
     private void drawLegend(Canvas canvas) {
         float verticalOffset = 0;
         for (int i = 0; i < mElements.size(); i++) {
