@@ -443,6 +443,10 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
     private boolean mShowLegend = true;
 
+    /**
+     * 图例开关
+     * @param enable
+     */
     public void enableLegend(boolean enable) {
         mShowLegend = enable;
     }
