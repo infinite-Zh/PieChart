@@ -222,101 +222,6 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
     private Rect rect = new Rect();
 
-    private void drawLegend(Canvas canvas) {
-        float verticalOffset = 0;
-        for (int i = 0; i < mElements.size(); i++) {
-            IPieElement ele = mElements.get(i);
-            mLegendPaint.setColor(Color.parseColor(ele.getColor()));
-            mLegendPaint.getTextBounds(ele.getDescription(), 0, ele.getDescription().length(), rect);
-            verticalOffset = rect.height() + 20;
-            canvas.translate(0, verticalOffset);
-            mLegendPaint.setStrokeWidth(8);
-            canvas.drawLine(10, 0, 80, 0, mLegendPaint);
-            canvas.drawText(ele.getDescription(), 90, rect.height() / 2, mLegendPaint);
-        }
-    }
-
-    /**
-     * 把文字分两行，并画在圆内接正方形内，依此计算画笔的textSize
-     *
-     * @param text
-     */
-    private void calculateTextPaint(String text) {
-        if (!TextUtils.isEmpty(text)) {
-            measureText(text, 100);
-        }
-    }
-
-    /**
-     * 递归调用，计算testSize
-     *
-     * @param text
-     * @param textSize
-     */
-    private void measureText(String text, int textSize) {
-        mTextPaint.setTextSize(textSize);
-        float width = getTextWidth(mTextPaint, text);
-        float height = getTextHeight(mTextPaint, text);
-        if (width > mInnerRadius * 1.41421) {
-            textSize--;
-            measureText(text, textSize);
-            return;
-        }
-        if (height * 2.5 > mInnerRadius * 1.41421) {
-            textSize--;
-            measureText(text, textSize);
-        }
-    }
-
-    private float getTextHeight(Paint paint, String text) {
-        Rect rect = new Rect();
-        paint.getTextBounds(text, 0, text.length(), rect);
-        return rect.height();
-    }
-
-    /**
-     * @param paint
-     * @param text
-     * @return
-     */
-    private float getTextWidth(Paint paint, String text) {
-        Rect rect = new Rect();
-        paint.getTextBounds(text, 0, text.length(), rect);
-        return rect.width();
-    }
-
-    /**
-     * 获取圆弧中点的x轴坐标
-     *
-     * @param angle        圆弧对应的角度
-     * @param sweepedAngle 扫过的角度
-     * @return 圆弧中点的x轴坐标
-     */
-    private float getXCoordinate(float angle, float sweepedAngle) {
-        float x = (float) (mRadius * Math.cos(Math.toRadians(sweepedAngle - angle / 2)));
-        return x;
-
-    }
-
-    /**
-     * 获取圆弧中点的y轴坐标
-     *
-     * @param angle        圆弧对应的角度
-     * @param sweepedAngle 扫过的角度
-     * @return 圆弧中点的y轴坐标
-     */
-    private float getYCoordinate(float angle, float sweepedAngle) {
-        float y = (float) (mRadius * Math.sin(Math.toRadians(sweepedAngle - angle / 2)));
-        return y;
-
-    }
-
-    private float getSize() {
-        Display display = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-        float widht = display.getWidth();
-        float height = display.getHeight();
-        return Math.min(widht, height);
-    }
 
     public void setData(List<IPieElement> elements) {
         mElements = elements;
@@ -450,4 +355,101 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
     public void enableLegend(boolean enable) {
         mShowLegend = enable;
     }
+
+    private void drawLegend(Canvas canvas) {
+        float verticalOffset = 0;
+        for (int i = 0; i < mElements.size(); i++) {
+            IPieElement ele = mElements.get(i);
+            mLegendPaint.setColor(Color.parseColor(ele.getColor()));
+            mLegendPaint.getTextBounds(ele.getDescription(), 0, ele.getDescription().length(), rect);
+            verticalOffset = rect.height() + 20;
+            canvas.translate(0, verticalOffset);
+            mLegendPaint.setStrokeWidth(8);
+            canvas.drawLine(10, 0, 80, 0, mLegendPaint);
+            canvas.drawText(ele.getDescription(), 90, rect.height() / 2, mLegendPaint);
+        }
+    }
+
+    /**
+     * 把文字分两行，并画在圆内接正方形内，依此计算画笔的textSize
+     *
+     * @param text
+     */
+    private void calculateTextPaint(String text) {
+        if (!TextUtils.isEmpty(text)) {
+            measureText(text, 100);
+        }
+    }
+
+    /**
+     * 递归调用，计算testSize
+     *
+     * @param text
+     * @param textSize
+     */
+    private void measureText(String text, int textSize) {
+        mTextPaint.setTextSize(textSize);
+        float width = getTextWidth(mTextPaint, text);
+        float height = getTextHeight(mTextPaint, text);
+        if (width > mInnerRadius * 1.41421) {
+            textSize--;
+            measureText(text, textSize);
+            return;
+        }
+        if (height * 2.5 > mInnerRadius * 1.41421) {
+            textSize--;
+            measureText(text, textSize);
+        }
+    }
+
+    private float getTextHeight(Paint paint, String text) {
+        Rect rect = new Rect();
+        paint.getTextBounds(text, 0, text.length(), rect);
+        return rect.height();
+    }
+
+    /**
+     * @param paint
+     * @param text
+     * @return
+     */
+    private float getTextWidth(Paint paint, String text) {
+        Rect rect = new Rect();
+        paint.getTextBounds(text, 0, text.length(), rect);
+        return rect.width();
+    }
+
+    /**
+     * 获取圆弧中点的x轴坐标
+     *
+     * @param angle        圆弧对应的角度
+     * @param sweepedAngle 扫过的角度
+     * @return 圆弧中点的x轴坐标
+     */
+    private float getXCoordinate(float angle, float sweepedAngle) {
+        float x = (float) (mRadius * Math.cos(Math.toRadians(sweepedAngle - angle / 2)));
+        return x;
+
+    }
+
+    /**
+     * 获取圆弧中点的y轴坐标
+     *
+     * @param angle        圆弧对应的角度
+     * @param sweepedAngle 扫过的角度
+     * @return 圆弧中点的y轴坐标
+     */
+    private float getYCoordinate(float angle, float sweepedAngle) {
+        float y = (float) (mRadius * Math.sin(Math.toRadians(sweepedAngle - angle / 2)));
+        return y;
+
+    }
+
+    private float getSize() {
+        Display display = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        float widht = display.getWidth();
+        float height = display.getHeight();
+        return Math.min(widht, height);
+    }
+
 }
