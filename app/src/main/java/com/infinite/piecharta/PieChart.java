@@ -314,6 +314,16 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         float centerX = getWidth() / 2;
         float centerY = getHeight() / 2;
 
+        //判断点击位置是否在innerRadius内
+        if ((Math.pow(x-centerX,2)+Math.pow(y-centerY,2))<mInnerRadius*mInnerRadius){
+            return -1;
+        }
+
+        //判断点击位置是否在饼状图以外
+        if ((Math.pow(x-centerX,2)+Math.pow(y-centerY,2))>mRadius*mRadius){
+            return -1;
+        }
+
         // 判断象限
         // 第一象限
         double angle = 0;
