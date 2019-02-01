@@ -112,6 +112,7 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         return mDetector.onTouchEvent(event);
     }
 
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -318,7 +319,6 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
     @Override
     public boolean onSingleTapUp(MotionEvent motionEvent) {
 
-//        Log.e("angle", String.valueOf(angle));
         mCurrentPressedPosition = getPosition(motionEvent);
         startTouchUpAnim();
         if (mCurrentPressedPosition >= 0 && mListener != null) {
@@ -330,12 +330,13 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
     @Override
     public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
-        return false;
+        mCurrentPressedPosition = getPosition(motionEvent);
+        startTouchUpAnim();
+        return true;
     }
 
     @Override
     public void onLongPress(MotionEvent motionEvent) {
-        Log.e("logn","ggg");
     }
 
     @Override
