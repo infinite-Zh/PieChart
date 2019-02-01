@@ -46,3 +46,10 @@ one.setTitleText("年终总结比例图");
 <ol>
 <li>添加了点击事件的回调<li>添加图例展示
 <ol>
+
+#### v13
+<ol>
+<li>添加了点击动画效果
+
+![](screenshot/clickanim.gif)
+<ol>
