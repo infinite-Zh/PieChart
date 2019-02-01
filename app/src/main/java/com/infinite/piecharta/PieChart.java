@@ -28,6 +28,8 @@ import java.util.List;
 public class PieChart extends View implements GestureDetector.OnGestureListener {
 
 
+    public static final int CLICK_ANIM_LENGTH = 50;
+    public static final int DURATION = 200;
     /**
      * view的宽高
      */
@@ -155,7 +157,6 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         float sweepedAngle = -90;
         mTextPaint.setTextSize(30);
         for (int i = 0; mElements != null && mElements.size() > i; i++) {
-            resetRect();
             //设置扇形的颜色
             mPiePaint.setColor(Color.parseColor(mColors.get(i)));
             mLinePaint.setColor(Color.parseColor(mColors.get(i)));
@@ -164,6 +165,8 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
                 setRect(sweepedAngle, i, mCurrentLength);
             }
             canvas.drawArc(mPieRect, sweepedAngle, mAngles.get(i), true, mPiePaint);
+            resetRect();
+
             //扫过的角度++
             double[] ang = new double[2];
             ang[0] = sweepedAngle + 90;
@@ -342,7 +345,7 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
     private int mCurrentPressedPosition;
     private void startTouchDownAnim(){
 //        ValueAnimatorCompat va= new ValueAnimatorCompat();
-        ValueAnimator va=ValueAnimator.ofInt(0,50);
+        ValueAnimator va=ValueAnimator.ofInt(0, CLICK_ANIM_LENGTH);
         va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
@@ -350,12 +353,12 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
                 invalidate();
             }
         });
-        va.setDuration(200);
+        va.setDuration(DURATION);
         va.start();
     }
     private void startTouchUpAnim(){
 //        ValueAnimatorCompat va= new ValueAnimatorCompat();
-        ValueAnimator va=ValueAnimator.ofInt(50,0);
+        ValueAnimator va=ValueAnimator.ofInt(CLICK_ANIM_LENGTH,0);
         va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
@@ -363,7 +366,7 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
                 invalidate();
             }
         });
-        va.setDuration(200);
+        va.setDuration(DURATION);
         va.start();
     }
 
