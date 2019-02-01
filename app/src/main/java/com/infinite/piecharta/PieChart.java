@@ -10,6 +10,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -86,6 +87,7 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
     private void init() {
         mDetector = new GestureDetector(getContext(), this);
+        mDetector.setIsLongpressEnabled(false);
         mPieRect = new RectF();
         mPiePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPiePaint.setColor(Color.RED);
@@ -333,7 +335,7 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
     @Override
     public void onLongPress(MotionEvent motionEvent) {
-
+        Log.e("logn","ggg");
     }
 
     @Override
