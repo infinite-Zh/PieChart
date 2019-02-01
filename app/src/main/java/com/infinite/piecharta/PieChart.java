@@ -84,7 +84,11 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         super(context, attrs, defStyleAttr);
         init();
     }
-
+    public void setData(List<IPieElement> elements) {
+        mElements = elements;
+        setValuesAndColors();
+        invalidate();
+    }
     private void init() {
         mDetector = new GestureDetector(getContext(), this);
         mDetector.setIsLongpressEnabled(false);
@@ -201,7 +205,6 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
                 mPath.lineTo((float) (x * 1.2) + horizontalLineLength, (float) (y * 1.2));
 
             }
-            mPath.close();
             canvas.drawPath(mPath, mLinePaint);
             //垂直方向的偏移量，画文字时，文字显示在path的下方，为了让文字显示在上方，设置一个文字高度的垂直偏移量
             float offsetV = -getTextHeight(mTextPaint, percentText);
@@ -209,6 +212,7 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
 
         }
+        mPath.close();
 
         //这里开始画中心空白部分以及文字，空白部分半径设置为整个圆半径的0.6倍
 
@@ -263,11 +267,7 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
     private Rect rect = new Rect();
 
 
-    public void setData(List<IPieElement> elements) {
-        mElements = elements;
-        setValuesAndColors();
-        invalidate();
-    }
+
 
     /**
      * 设置中心文字
