@@ -1,5 +1,6 @@
 package com.infinite.piecharta;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -137,10 +138,7 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         mWidth = w - getPaddingLeft() - getPaddingRight();
         mHeight = h - getPaddingTop() - getPaddingBottom();
         mRadius = (float) (Math.min(mWidth, mHeight) / 2 * 0.6);
-        mPieRect.left = -mRadius;
-        mPieRect.top = -mRadius;
-        mPieRect.right = mRadius;
-        mPieRect.bottom = mRadius;
+        resetRect();
 
         mInnerRadius = (float) (mRadius * 0.6);
 
@@ -157,10 +155,14 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         float sweepedAngle = -90;
         mTextPaint.setTextSize(30);
         for (int i = 0; mElements != null && mElements.size() > i; i++) {
+            resetRect();
             //设置扇形的颜色
             mPiePaint.setColor(Color.parseColor(mColors.get(i)));
             mLinePaint.setColor(Color.parseColor(mColors.get(i)));
             //画扇形
+            if (i == mCurrentPressedPosition) {
+                setRect(sweepedAngle, i, mCurrentLength);
+            }
             canvas.drawArc(mPieRect, sweepedAngle, mAngles.get(i), true, mPiePaint);
             //扫过的角度++
             double[] ang = new double[2];
@@ -220,6 +222,38 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         }
     }
 
+    private void resetRect() {
+        mPieRect.left = -mRadius;
+        mPieRect.top = -mRadius;
+        mPieRect.right = mRadius;
+        mPieRect.bottom = mRadius;
+    }
+
+    private void setRect(float sweepedAngle, int i,int animatedLength) {
+        float currentCenterAngle = sweepedAngle + mAngles.get(i) / 2;
+        if (currentCenterAngle >= -90 && currentCenterAngle <= 0) {
+            double actualAng=currentCenterAngle+90;
+            mPieRect.right += Math.sin(getRadian(actualAng)) * animatedLength;
+            mPieRect.top -= Math.cos(getRadian(actualAng)) * animatedLength;
+
+        } else if (currentCenterAngle >0 && currentCenterAngle <= 90){
+            mPieRect.right += Math.cos(getRadian(currentCenterAngle)) * animatedLength;
+            mPieRect.bottom += Math.sin(getRadian(currentCenterAngle)) * animatedLength;
+        }else if (currentCenterAngle>90&&currentCenterAngle<=180){
+            double actualAng=currentCenterAngle-90;
+            mPieRect.left -= Math.sin(getRadian(actualAng)) * animatedLength;
+            mPieRect.bottom += Math.cos(getRadian(actualAng)) * animatedLength;
+        }else {
+            double actualAng=currentCenterAngle-180;
+            mPieRect.left -= Math.cos(getRadian(actualAng)) * animatedLength;
+            mPieRect.top -= Math.sin(getRadian(actualAng)) * animatedLength;
+        }
+    }
+
+    private double getRadian(double actualAng) {
+        return actualAng * 2 * Math.PI / 360;
+    }
+
     private Rect rect = new Rect();
 
 
@@ -266,7 +300,8 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
     @Override
     public boolean onDown(MotionEvent motionEvent) {
-
+        mCurrentPressedPosition = getPosition(motionEvent);
+        startTouchDownAnim();
         return true;
     }
 
@@ -279,9 +314,10 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
     public boolean onSingleTapUp(MotionEvent motionEvent) {
 
 //        Log.e("angle", String.valueOf(angle));
-        int position = getPosition(motionEvent);
-        if (position >= 0 && mListener != null) {
-            mListener.onItemClick(position);
+        mCurrentPressedPosition = getPosition(motionEvent);
+        startTouchUpAnim();
+        if (mCurrentPressedPosition >= 0 && mListener != null) {
+            mListener.onItemClick(mCurrentPressedPosition);
         }
 
         return false;
@@ -302,9 +338,38 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         return false;
     }
 
+    private int mCurrentLength;
+    private int mCurrentPressedPosition;
+    private void startTouchDownAnim(){
+//        ValueAnimatorCompat va= new ValueAnimatorCompat();
+        ValueAnimator va=ValueAnimator.ofInt(0,50);
+        va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                mCurrentLength = (int) animation.getAnimatedValue();
+                invalidate();
+            }
+        });
+        va.setDuration(200);
+        va.start();
+    }
+    private void startTouchUpAnim(){
+//        ValueAnimatorCompat va= new ValueAnimatorCompat();
+        ValueAnimator va=ValueAnimator.ofInt(50,0);
+        va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                mCurrentLength = (int) animation.getAnimatedValue();
+                invalidate();
+            }
+        });
+        va.setDuration(200);
+        va.start();
+    }
 
     /**
      * 获取点击位置坐标对应的饼状图的区域
+     *
      * @param motionEvent
      * @return 数据的position
      */
@@ -315,12 +380,12 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         float centerY = getHeight() / 2;
 
         //判断点击位置是否在innerRadius内
-        if ((Math.pow(x-centerX,2)+Math.pow(y-centerY,2))<mInnerRadius*mInnerRadius){
+        if ((Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2)) < mInnerRadius * mInnerRadius) {
             return -1;
         }
 
         //判断点击位置是否在饼状图以外
-        if ((Math.pow(x-centerX,2)+Math.pow(y-centerY,2))>mRadius*mRadius){
+        if ((Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2)) > mRadius * mRadius) {
             return -1;
         }
 
@@ -365,6 +430,7 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
     /**
      * 图例开关
+     *
      * @param enable
      */
     public void enableLegend(boolean enable) {
@@ -373,6 +439,7 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
     /**
      * 画图例
+     *
      * @param canvas
      */
     private void drawLegend(Canvas canvas) {
