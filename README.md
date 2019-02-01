@@ -51,4 +51,5 @@ one.setTitleText("年终总结比例图");
 <ol>
 <li>添加了点击动画效果
 <ol>
+---
 ![](screenshot/clickanim.gif)
