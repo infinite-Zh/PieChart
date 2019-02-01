@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
         list.add(entity6);
         one.setData(list);
         one.setTitleText("年终总结比例图");
+        one.setAnimEnable(true);
         one.enableLegend(true);
         one.setOnItemClickListener(new PieChart.OnItemClickListener() {
             @Override

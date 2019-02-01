@@ -72,6 +72,8 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
     private GestureDetector mDetector;
 
+    private boolean mIsAnimEnable;
+
     public PieChart(Context context) {
         this(context, null);
     }
@@ -84,11 +86,17 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         super(context, attrs, defStyleAttr);
         init();
     }
+
     public void setData(List<IPieElement> elements) {
         mElements = elements;
         setValuesAndColors();
         invalidate();
     }
+
+    public void setAnimEnable(boolean enable) {
+        mIsAnimEnable = enable;
+    }
+
     private void init() {
         mDetector = new GestureDetector(getContext(), this);
         mDetector.setIsLongpressEnabled(false);
@@ -168,7 +176,7 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
             mPiePaint.setColor(Color.parseColor(mColors.get(i)));
             mLinePaint.setColor(Color.parseColor(mColors.get(i)));
             //画扇形
-            if (i == mCurrentPressedPosition) {
+            if (mIsAnimEnable && i == mCurrentPressedPosition) {
                 setRect(sweepedAngle, i, mCurrentLength);
             }
             canvas.drawArc(mPieRect, sweepedAngle, mAngles.get(i), true, mPiePaint);
@@ -239,22 +247,22 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         mPieRect.bottom = mRadius;
     }
 
-    private void setRect(float sweepedAngle, int i,int animatedLength) {
+    private void setRect(float sweepedAngle, int i, int animatedLength) {
         float currentCenterAngle = sweepedAngle + mAngles.get(i) / 2;
         if (currentCenterAngle >= -90 && currentCenterAngle <= 0) {
-            double actualAng=currentCenterAngle+90;
+            double actualAng = currentCenterAngle + 90;
             mPieRect.right += Math.sin(getRadian(actualAng)) * animatedLength;
             mPieRect.top -= Math.cos(getRadian(actualAng)) * animatedLength;
 
-        } else if (currentCenterAngle >0 && currentCenterAngle <= 90){
+        } else if (currentCenterAngle > 0 && currentCenterAngle <= 90) {
             mPieRect.right += Math.cos(getRadian(currentCenterAngle)) * animatedLength;
             mPieRect.bottom += Math.sin(getRadian(currentCenterAngle)) * animatedLength;
-        }else if (currentCenterAngle>90&&currentCenterAngle<=180){
-            double actualAng=currentCenterAngle-90;
+        } else if (currentCenterAngle > 90 && currentCenterAngle <= 180) {
+            double actualAng = currentCenterAngle - 90;
             mPieRect.left -= Math.sin(getRadian(actualAng)) * animatedLength;
             mPieRect.bottom += Math.cos(getRadian(actualAng)) * animatedLength;
-        }else {
-            double actualAng=currentCenterAngle-180;
+        } else {
+            double actualAng = currentCenterAngle - 180;
             mPieRect.left -= Math.cos(getRadian(actualAng)) * animatedLength;
             mPieRect.top -= Math.sin(getRadian(actualAng)) * animatedLength;
         }
@@ -265,8 +273,6 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
     }
 
     private Rect rect = new Rect();
-
-
 
 
     /**
@@ -346,9 +352,10 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
     private int mCurrentLength;
     private int mCurrentPressedPosition;
-    private void startTouchDownAnim(){
+
+    private void startTouchDownAnim() {
 //        ValueAnimatorCompat va= new ValueAnimatorCompat();
-        ValueAnimator va=ValueAnimator.ofInt(0, CLICK_ANIM_LENGTH);
+        ValueAnimator va = ValueAnimator.ofInt(0, CLICK_ANIM_LENGTH);
         va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
@@ -359,9 +366,10 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         va.setDuration(DURATION);
         va.start();
     }
-    private void startTouchUpAnim(){
+
+    private void startTouchUpAnim() {
 //        ValueAnimatorCompat va= new ValueAnimatorCompat();
-        ValueAnimator va=ValueAnimator.ofInt(CLICK_ANIM_LENGTH,0);
+        ValueAnimator va = ValueAnimator.ofInt(CLICK_ANIM_LENGTH, 0);
         va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
