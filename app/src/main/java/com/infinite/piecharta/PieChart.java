@@ -195,7 +195,7 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
             String percentText = mPercents.get(i) + "%";
             //画分割线
-            canvas.drawArc(mPieRect, sweepedAngle, 1, true, mBlankPaint);
+            canvas.drawArc(mPieRect, sweepedAngle, 1, false, mBlankPaint);
             sweepedAngle += 1;
             float x = getXCoordinate(mAngles.get(i), sweepedAngle);
             float y = getYCoordinate(mAngles.get(i), sweepedAngle);
