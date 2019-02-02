@@ -10,7 +10,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -29,7 +28,7 @@ import java.util.List;
 public class PieChart extends View implements GestureDetector.OnGestureListener {
 
 
-    public static final int CLICK_ANIM_LENGTH = 50;
+    public static final float ANIM_FACTOR = 1.5f;
     public static final int DURATION = 200;
     /**
      * view的宽高
@@ -181,10 +180,11 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
             mLinePaint.setColor(Color.parseColor(mColors.get(i)));
             //画扇形
             if (mIsAnimEnable && i == mCurrentPressedPosition) {
-                setRect(sweepedAngle, i, mCurrentLength);
+                setRingWidth( mCurrentLength);
             }
             canvas.drawArc(mPieRect, sweepedAngle, mAngles.get(i), false, mPiePaint);
             resetRect();
+            resetPiePaint();
 
             //扫过的角度++
             double[] ang = new double[2];
@@ -250,26 +250,35 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         mPieRect.right = (float) (mRadius-0.5*mRingWidth);
         mPieRect.bottom = (float) (mRadius-0.5*mRingWidth);
     }
+    private void resetPiePaint(){
+        mPiePaint.setStrokeWidth(mRingWidth);
+    }
 
-    private void setRect(float sweepedAngle, int i, int animatedLength) {
-        float currentCenterAngle = sweepedAngle + mAngles.get(i) / 2;
-        if (currentCenterAngle >= -90 && currentCenterAngle <= 0) {
-            double actualAng = currentCenterAngle + 90;
-            mPieRect.right += Math.sin(getRadian(actualAng)) * animatedLength;
-            mPieRect.top -= Math.cos(getRadian(actualAng)) * animatedLength;
+//    private void setRect(float sweepedAngle, int i, int animatedLength) {
+//        float currentCenterAngle = sweepedAngle + mAngles.get(i) / 2;
+//        float mStrokeWidthDif=0;
+//        if (currentCenterAngle >= -90 && currentCenterAngle <= 0) {
+//            double actualAng = currentCenterAngle + 90;
+//            mPieRect.right += Math.sin(getRadian(actualAng)) * animatedLength;
+//            mPieRect.top -= Math.cos(getRadian(actualAng)) * animatedLength;
+//
+//        } else if (currentCenterAngle > 0 && currentCenterAngle <= 90) {
+//            mPieRect.right += Math.cos(getRadian(currentCenterAngle)) * animatedLength;
+//            mPieRect.bottom += Math.sin(getRadian(currentCenterAngle)) * animatedLength;
+//        } else if (currentCenterAngle > 90 && currentCenterAngle <= 180) {
+//            double actualAng = currentCenterAngle - 90;
+//            mPieRect.left -= Math.sin(getRadian(actualAng)) * animatedLength;
+//            mPieRect.bottom += Math.cos(getRadian(actualAng)) * animatedLength;
+//        } else {
+//            double actualAng = currentCenterAngle - 180;
+//            mPieRect.left -= Math.cos(getRadian(actualAng)) * animatedLength;
+//            mPieRect.top -= Math.sin(getRadian(actualAng)) * animatedLength;
+//        }
+//    }
 
-        } else if (currentCenterAngle > 0 && currentCenterAngle <= 90) {
-            mPieRect.right += Math.cos(getRadian(currentCenterAngle)) * animatedLength;
-            mPieRect.bottom += Math.sin(getRadian(currentCenterAngle)) * animatedLength;
-        } else if (currentCenterAngle > 90 && currentCenterAngle <= 180) {
-            double actualAng = currentCenterAngle - 90;
-            mPieRect.left -= Math.sin(getRadian(actualAng)) * animatedLength;
-            mPieRect.bottom += Math.cos(getRadian(actualAng)) * animatedLength;
-        } else {
-            double actualAng = currentCenterAngle - 180;
-            mPieRect.left -= Math.cos(getRadian(actualAng)) * animatedLength;
-            mPieRect.top -= Math.sin(getRadian(actualAng)) * animatedLength;
-        }
+    private void setRingWidth(float factor){
+        mPiePaint.setStrokeWidth(mRingWidth*factor);
+
     }
 
     private double getRadian(double actualAng) {
@@ -354,16 +363,16 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         return false;
     }
 
-    private int mCurrentLength;
-    private int mCurrentPressedPosition;
+    private float mCurrentLength;
+    private int mCurrentPressedPosition=-1;
 
     private void startTouchDownAnim() {
 //        ValueAnimatorCompat va= new ValueAnimatorCompat();
-        ValueAnimator va = ValueAnimator.ofInt(0, CLICK_ANIM_LENGTH);
+        ValueAnimator va = ValueAnimator.ofFloat(1f, ANIM_FACTOR);
         va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                mCurrentLength = (int) animation.getAnimatedValue();
+                mCurrentLength = (float) animation.getAnimatedValue();
                 invalidate();
             }
         });
@@ -373,11 +382,11 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
     private void startTouchUpAnim() {
 //        ValueAnimatorCompat va= new ValueAnimatorCompat();
-        ValueAnimator va = ValueAnimator.ofInt(CLICK_ANIM_LENGTH, 0);
+        ValueAnimator va = ValueAnimator.ofFloat(ANIM_FACTOR, 1);
         va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                mCurrentLength = (int) animation.getAnimatedValue();
+                mCurrentLength = (float) animation.getAnimatedValue();
                 invalidate();
             }
         });
