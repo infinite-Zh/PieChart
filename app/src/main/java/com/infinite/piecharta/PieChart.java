@@ -77,6 +77,8 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
     private boolean mIsAnimEnable;
 
+    private boolean mInitialized;
+
     public PieChart(Context context) {
         this(context, null);
     }
@@ -102,7 +104,6 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
     public void setSelected(int position){
         mCurrentSelectedPosition=position;
-
     }
 
     private void init() {
@@ -267,6 +268,10 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         if (mShowLegend) {
             drawLegend(canvas);
         }
+        if (!mInitialized){
+            startAnim();
+            mInitialized=true;
+        }
     }
 
     private void resetRect() {
@@ -279,29 +284,6 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
     private void resetPiePaint() {
         mPiePaint.setStrokeWidth(mRingWidth);
     }
-
-//    private void setRect(float sweepedAngle, int i, int animatedLength) {
-//        float currentCenterAngle = sweepedAngle + mAngles.get(i) / 2;
-//        float mStrokeWidthDif=0;
-//        if (currentCenterAngle >= -90 && currentCenterAngle <= 0) {
-//            double actualAng = currentCenterAngle + 90;
-//            mPieRect.right += Math.sin(getRadian(actualAng)) * animatedLength;
-//            mPieRect.top -= Math.cos(getRadian(actualAng)) * animatedLength;
-//
-//        } else if (currentCenterAngle > 0 && currentCenterAngle <= 90) {
-//            mPieRect.right += Math.cos(getRadian(currentCenterAngle)) * animatedLength;
-//            mPieRect.bottom += Math.sin(getRadian(currentCenterAngle)) * animatedLength;
-//        } else if (currentCenterAngle > 90 && currentCenterAngle <= 180) {
-//            double actualAng = currentCenterAngle - 90;
-//            mPieRect.left -= Math.sin(getRadian(actualAng)) * animatedLength;
-//            mPieRect.bottom += Math.cos(getRadian(actualAng)) * animatedLength;
-//        } else {
-//            double actualAng = currentCenterAngle - 180;
-//            mPieRect.left -= Math.cos(getRadian(actualAng)) * animatedLength;
-//            mPieRect.top -= Math.sin(getRadian(actualAng)) * animatedLength;
-//        }
-//    }
-
 
     private double getRadian(double actualAng) {
         return actualAng * 2 * Math.PI / 360;
@@ -344,7 +326,6 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
                 mPercents.add(eleDecimal.multiply(new BigDecimal(100)).divide(sumBigDecimal, 2, BigDecimal.ROUND_HALF_UP).toPlainString());
                 r += angle.floatValue();
             }
-            Log.e("a", r + "");
         }
 
     }
@@ -369,18 +350,22 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         if (mLastSelectedPosition == mCurrentSelectedPosition) {
             return true;
         }
-        startSelectedAnim();
-        startUnselectedAnim();
+
         if (mCurrentSelectedPosition >= 0 && mListener != null) {
             mListener.onItemClick(mCurrentSelectedPosition);
         }
-
+        startAnim();
         return false;
+    }
+
+    private void startAnim() {
+        startSelectedAnim();
+        startUnselectedAnim();
     }
 
     @Override
     public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
-        mCurrentSelectedPosition = getPosition(motionEvent);
+//        mCurrentSelectedPosition = getPosition(motionEvent);
 //        startUnselectedAnim();
         return true;
     }
