@@ -103,6 +103,7 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         mPieRect = new RectF();
         mPiePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPiePaint.setColor(Color.RED);
+        mPiePaint.setStyle(Paint.Style.STROKE);
 
         mBlankPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mBlankPaint.setColor(Color.WHITE);
@@ -149,15 +150,18 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
     }
 
+    private float mRingWidth;
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         mWidth = w - getPaddingLeft() - getPaddingRight();
         mHeight = h - getPaddingTop() - getPaddingBottom();
         mRadius = (float) (Math.min(mWidth, mHeight) / 2 * 0.6);
-        resetRect();
 
         mInnerRadius = (float) (mRadius * 0.6);
+        mRingWidth=mRadius-mInnerRadius;
+        mPiePaint.setStrokeWidth(mRingWidth);
+        resetRect();
 
     }
 
@@ -179,7 +183,7 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
             if (mIsAnimEnable && i == mCurrentPressedPosition) {
                 setRect(sweepedAngle, i, mCurrentLength);
             }
-            canvas.drawArc(mPieRect, sweepedAngle, mAngles.get(i), true, mPiePaint);
+            canvas.drawArc(mPieRect, sweepedAngle, mAngles.get(i), false, mPiePaint);
             resetRect();
 
             //扫过的角度++
@@ -224,7 +228,7 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
         //这里开始画中心空白部分以及文字，空白部分半径设置为整个圆半径的0.6倍
 
-        canvas.drawCircle(0, 0, mInnerRadius, mBlankPaint);
+//        canvas.drawCircle(0, 0, mInnerRadius, mBlankPaint);
         double index = Math.ceil(mText.length() / 2) + 1;
         if (mText.length() % 2 == 0) {
             index -= 1;
@@ -241,10 +245,10 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
     }
 
     private void resetRect() {
-        mPieRect.left = -mRadius;
-        mPieRect.top = -mRadius;
-        mPieRect.right = mRadius;
-        mPieRect.bottom = mRadius;
+        mPieRect.left = (float) (-mRadius+0.5*mRingWidth);
+        mPieRect.top = (float) (-mRadius+0.5*mRingWidth);
+        mPieRect.right = (float) (mRadius-0.5*mRingWidth);
+        mPieRect.bottom = (float) (mRadius-0.5*mRingWidth);
     }
 
     private void setRect(float sweepedAngle, int i, int animatedLength) {
