@@ -10,7 +10,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -115,7 +114,7 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         mPiePaint.setStyle(Paint.Style.STROKE);
 
 //        Paint p=new Paint();
-//        p.setStrokeWidth(mUnselectedLength*mRingWidth);
+//        p.setStrokeWidth(mUnselectedFactor*mRingWidth);
 //        p.setStyle(Paint.Style.STROKE);
 //        p.setColor(Color.parseColor(mColors.get(i)));
 
@@ -198,11 +197,11 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
             //画扇形
             if (mIsAnimEnable) {
                 if (i == mCurrentSelectedPosition) {
-                    mPiePaint.setStrokeWidth(mCurrentLength * mRingWidth);
+                    mPiePaint.setStrokeWidth(mSelectedFactor * mRingWidth);
                     canvas.drawArc(mPieRect, sweepedAngle, mAngles.get(i), false, mPiePaint);
                     resetPiePaint();
                 } else if (i == mLastSelectedPosition) {
-                    mPiePaint.setStrokeWidth(mUnselectedLength * mRingWidth);
+                    mPiePaint.setStrokeWidth(mUnselectedFactor * mRingWidth);
                     canvas.drawArc(mPieRect, sweepedAngle, mAngles.get(i), false, mPiePaint);
                     resetPiePaint();
                 } else {
@@ -314,7 +313,6 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
             BigDecimal totleAngel = BigDecimal.valueOf(360 - mElements.size() * DIVIDER_ANG);
             BigDecimal sumBigDecimal = BigDecimal.valueOf(sum);
             BigDecimal angleFactor = totleAngel.divide(sumBigDecimal, 5, BigDecimal.ROUND_UP);
-            float r = 0;
             for (int i = 0; i < mElements.size(); i++) {
                 IPieElement ele = mElements.get(i);
                 BigDecimal eleDecimal = new BigDecimal(String.valueOf(ele.getValue()));
@@ -324,7 +322,6 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
                 mAngles.add(angle.floatValue());
                 //计算百分比保留两位小数并保存
                 mPercents.add(eleDecimal.multiply(new BigDecimal(100)).divide(sumBigDecimal, 2, BigDecimal.ROUND_HALF_UP).toPlainString());
-                r += angle.floatValue();
             }
         }
 
@@ -379,33 +376,30 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         return false;
     }
 
-    private float mCurrentLength;
+    private float mSelectedFactor;
+    private float mUnselectedFactor = 0;
+
     private int mCurrentSelectedPosition = -1;
     private int mLastSelectedPosition = -1;
 
     private void startSelectedAnim() {
-//        ValueAnimatorCompat va= new ValueAnimatorCompat();
         ValueAnimator va = ValueAnimator.ofFloat(1f, ANIM_FACTOR);
         va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                mCurrentLength = (float) animation.getAnimatedValue();
+                mSelectedFactor = (float) animation.getAnimatedValue();
                 invalidate();
             }
         });
         va.setDuration(DURATION);
         va.start();
     }
-
-    private float mUnselectedLength = 0;
-
     private void startUnselectedAnim() {
-//        ValueAnimatorCompat va= new ValueAnimatorCompat();
         ValueAnimator va = ValueAnimator.ofFloat(ANIM_FACTOR, 1);
         va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                mUnselectedLength = (float) animation.getAnimatedValue();
+                mUnselectedFactor = (float) animation.getAnimatedValue();
                 invalidate();
             }
         });
