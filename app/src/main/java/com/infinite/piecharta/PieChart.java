@@ -10,6 +10,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -30,6 +31,7 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
     public static final float ANIM_FACTOR = 1.5f;
     public static final int DURATION = 200;
+    public static final int DIVIDER_ANG = 0;
     /**
      * view的宽高
      */
@@ -42,6 +44,8 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
      * 饼状图的外切
      */
     private RectF mPieRect;
+
+//    private Paint mUnselectedP
     /**
      * 各种画笔
      */
@@ -96,6 +100,11 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         mIsAnimEnable = enable;
     }
 
+    public void setSelected(int position){
+        mCurrentSelectedPosition=position;
+
+    }
+
     private void init() {
         mDetector = new GestureDetector(getContext(), this);
         mDetector.setIsLongpressEnabled(false);
@@ -103,6 +112,11 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         mPiePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPiePaint.setColor(Color.RED);
         mPiePaint.setStyle(Paint.Style.STROKE);
+
+//        Paint p=new Paint();
+//        p.setStrokeWidth(mUnselectedLength*mRingWidth);
+//        p.setStyle(Paint.Style.STROKE);
+//        p.setColor(Color.parseColor(mColors.get(i)));
 
         mBlankPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mBlankPaint.setColor(Color.WHITE);
@@ -150,6 +164,7 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
     }
 
     private float mRingWidth;
+
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
@@ -158,11 +173,12 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         mRadius = (float) (Math.min(mWidth, mHeight) / 2 * 0.6);
 
         mInnerRadius = (float) (mRadius * 0.6);
-        mRingWidth=mRadius-mInnerRadius;
+        mRingWidth = mRadius - mInnerRadius;
         mPiePaint.setStrokeWidth(mRingWidth);
         resetRect();
 
     }
+
 
     private Path mPath = new Path();
 
@@ -179,12 +195,21 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
             mPiePaint.setColor(Color.parseColor(mColors.get(i)));
             mLinePaint.setColor(Color.parseColor(mColors.get(i)));
             //画扇形
-            if (mIsAnimEnable && i == mCurrentPressedPosition) {
-                setRingWidth( mCurrentLength);
+            if (mIsAnimEnable) {
+                if (i == mCurrentSelectedPosition) {
+                    mPiePaint.setStrokeWidth(mCurrentLength * mRingWidth);
+                    canvas.drawArc(mPieRect, sweepedAngle, mAngles.get(i), false, mPiePaint);
+                    resetPiePaint();
+                } else if (i == mLastSelectedPosition) {
+                    mPiePaint.setStrokeWidth(mUnselectedLength * mRingWidth);
+                    canvas.drawArc(mPieRect, sweepedAngle, mAngles.get(i), false, mPiePaint);
+                    resetPiePaint();
+                } else {
+                    canvas.drawArc(mPieRect, sweepedAngle, mAngles.get(i), false, mPiePaint);
+                }
+            } else {
+                canvas.drawArc(mPieRect, sweepedAngle, mAngles.get(i), false, mPiePaint);
             }
-            canvas.drawArc(mPieRect, sweepedAngle, mAngles.get(i), false, mPiePaint);
-            resetRect();
-            resetPiePaint();
 
             //扫过的角度++
             double[] ang = new double[2];
@@ -195,8 +220,8 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
             String percentText = mPercents.get(i) + "%";
             //画分割线
-            canvas.drawArc(mPieRect, sweepedAngle, 1, false, mBlankPaint);
-            sweepedAngle += 1;
+            canvas.drawArc(mPieRect, sweepedAngle, DIVIDER_ANG, false, mBlankPaint);
+            sweepedAngle += DIVIDER_ANG;
             float x = getXCoordinate(mAngles.get(i), sweepedAngle);
             float y = getYCoordinate(mAngles.get(i), sweepedAngle);
             mPath.reset();
@@ -245,12 +270,13 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
     }
 
     private void resetRect() {
-        mPieRect.left = (float) (-mRadius+0.5*mRingWidth);
-        mPieRect.top = (float) (-mRadius+0.5*mRingWidth);
-        mPieRect.right = (float) (mRadius-0.5*mRingWidth);
-        mPieRect.bottom = (float) (mRadius-0.5*mRingWidth);
+        mPieRect.left = (float) (-mRadius + 0.5 * mRingWidth);
+        mPieRect.top = (float) (-mRadius + 0.5 * mRingWidth);
+        mPieRect.right = (float) (mRadius - 0.5 * mRingWidth);
+        mPieRect.bottom = (float) (mRadius - 0.5 * mRingWidth);
     }
-    private void resetPiePaint(){
+
+    private void resetPiePaint() {
         mPiePaint.setStrokeWidth(mRingWidth);
     }
 
@@ -276,10 +302,6 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 //        }
 //    }
 
-    private void setRingWidth(float factor){
-        mPiePaint.setStrokeWidth(mRingWidth*factor);
-
-    }
 
     private double getRadian(double actualAng) {
         return actualAng * 2 * Math.PI / 360;
@@ -307,26 +329,30 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
                 sum += ele.getValue();
                 mColors.add(ele.getColor());
             }
-            BigDecimal totleAngel = BigDecimal.valueOf(360 - mElements.size());
+            BigDecimal totleAngel = BigDecimal.valueOf(360 - mElements.size() * DIVIDER_ANG);
+            BigDecimal sumBigDecimal = BigDecimal.valueOf(sum);
+            BigDecimal angleFactor = totleAngel.divide(sumBigDecimal, 5, BigDecimal.ROUND_UP);
+            float r = 0;
             for (int i = 0; i < mElements.size(); i++) {
                 IPieElement ele = mElements.get(i);
-                BigDecimal bigDecimal = new BigDecimal(String.valueOf(ele.getValue()));
-                BigDecimal sumBigDecimal = BigDecimal.valueOf(sum);
-                BigDecimal res = bigDecimal.divide(sumBigDecimal, 5, BigDecimal.ROUND_HALF_UP);
+                BigDecimal eleDecimal = new BigDecimal(String.valueOf(ele.getValue()));
+//                BigDecimal res = bigDecimal.divide(sumBigDecimal, 5, BigDecimal.ROUND_UP);
                 //计算角度
-                BigDecimal angle = res.multiply(totleAngel);
+                BigDecimal angle = eleDecimal.multiply(angleFactor);
                 mAngles.add(angle.floatValue());
                 //计算百分比保留两位小数并保存
-                mPercents.add(bigDecimal.multiply(new BigDecimal(100)).divide(sumBigDecimal, 2, BigDecimal.ROUND_HALF_UP).toPlainString());
+                mPercents.add(eleDecimal.multiply(new BigDecimal(100)).divide(sumBigDecimal, 2, BigDecimal.ROUND_HALF_UP).toPlainString());
+                r += angle.floatValue();
             }
+            Log.e("a", r + "");
         }
 
     }
 
     @Override
     public boolean onDown(MotionEvent motionEvent) {
-        mCurrentPressedPosition = getPosition(motionEvent);
-        startTouchDownAnim();
+//        mCurrentSelectedPosition = getPosition(motionEvent);
+//        startTouchDownAnim();
         return true;
     }
 
@@ -337,11 +363,16 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
     @Override
     public boolean onSingleTapUp(MotionEvent motionEvent) {
+        mLastSelectedPosition = mCurrentSelectedPosition;
 
-        mCurrentPressedPosition = getPosition(motionEvent);
-        startTouchUpAnim();
-        if (mCurrentPressedPosition >= 0 && mListener != null) {
-            mListener.onItemClick(mCurrentPressedPosition);
+        mCurrentSelectedPosition = getPosition(motionEvent);
+        if (mLastSelectedPosition == mCurrentSelectedPosition) {
+            return true;
+        }
+        startSelectedAnim();
+        startUnselectedAnim();
+        if (mCurrentSelectedPosition >= 0 && mListener != null) {
+            mListener.onItemClick(mCurrentSelectedPosition);
         }
 
         return false;
@@ -349,8 +380,8 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
 
     @Override
     public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
-        mCurrentPressedPosition = getPosition(motionEvent);
-        startTouchUpAnim();
+        mCurrentSelectedPosition = getPosition(motionEvent);
+//        startUnselectedAnim();
         return true;
     }
 
@@ -364,9 +395,10 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
     }
 
     private float mCurrentLength;
-    private int mCurrentPressedPosition=-1;
+    private int mCurrentSelectedPosition = -1;
+    private int mLastSelectedPosition = -1;
 
-    private void startTouchDownAnim() {
+    private void startSelectedAnim() {
 //        ValueAnimatorCompat va= new ValueAnimatorCompat();
         ValueAnimator va = ValueAnimator.ofFloat(1f, ANIM_FACTOR);
         va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -380,13 +412,15 @@ public class PieChart extends View implements GestureDetector.OnGestureListener 
         va.start();
     }
 
-    private void startTouchUpAnim() {
+    private float mUnselectedLength = 0;
+
+    private void startUnselectedAnim() {
 //        ValueAnimatorCompat va= new ValueAnimatorCompat();
         ValueAnimator va = ValueAnimator.ofFloat(ANIM_FACTOR, 1);
         va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                mCurrentLength = (float) animation.getAnimatedValue();
+                mUnselectedLength = (float) animation.getAnimatedValue();
                 invalidate();
             }
         });
